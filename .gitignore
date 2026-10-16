@@ -1,0 +1,15 @@
+# Bản nguồn tài nguyên ảnh (đã chép vào images/)
+20-10-assets/
+20-10-assets-highres/
+20-10-tarot-assets-highres/
+*.zip
+images-highres/
+images-web/
+
+# Hệ thống / editor
+.DS_Store
+Thumbs.db
+node_modules/
+.idea/
+.vscode/
+*.log
