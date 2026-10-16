@@ -1,0 +1,290 @@
+[
+ {
+  "id": "q1",
+  "dim": "EI",
+  "scenes": [
+   "friends gathered at a candle-lit dinner table under string lights, laughing",
+   "woman reading alone by a sunny window with a cup of tea"
+  ],
+  "letters": [
+   "E",
+   "I"
+  ]
+ },
+ {
+  "id": "q2",
+  "dim": "EI",
+  "scenes": [
+   "woman quietly observing a party from a corner, chatting with just two friends",
+   "woman confidently greeting new people at a lively party with a glass in hand"
+  ],
+  "letters": [
+   "I",
+   "E"
+  ]
+ },
+ {
+  "id": "q3",
+  "dim": "EI",
+  "scenes": [
+   "woman sharing an idea excitedly with friends around a cafe table, sticky notes",
+   "woman thinking quietly with a notebook by a window"
+  ],
+  "letters": [
+   "E",
+   "I"
+  ]
+ },
+ {
+  "id": "q4",
+  "dim": "EI",
+  "scenes": [
+   "woman enjoying a solo hobby, painting or walking alone in a quiet park",
+   "woman texting friends on her phone, smiling, planning an outing together"
+  ],
+  "letters": [
+   "I",
+   "E"
+  ]
+ },
+ {
+  "id": "q5",
+  "dim": "EI",
+  "scenes": [
+   "woman still glowing and chatting happily with friends at the end of a party night",
+   "woman alone on a quiet balcony at night with tea, calm and relaxed"
+  ],
+  "letters": [
+   "E",
+   "I"
+  ]
+ },
+ {
+  "id": "q6",
+  "dim": "EI",
+  "scenes": [
+   "woman thinking alone at a desk with a notebook, focused on a tricky problem",
+   "woman discussing a problem with colleagues around a whiteboard"
+  ],
+  "letters": [
+   "I",
+   "E"
+  ]
+ },
+ {
+  "id": "q7",
+  "dim": "SN",
+  "scenes": [
+   "woman following a recipe step by step in a bright kitchen",
+   "woman sketching a concept diagram on paper, thoughtful"
+  ],
+  "letters": [
+   "S",
+   "N"
+  ]
+ },
+ {
+  "id": "q8",
+  "dim": "SN",
+  "scenes": [
+   "woman smiling softly, remembering a feeling, dreamy golden light and floating petals",
+   "woman flipping through a detailed photo album with dates and notes"
+  ],
+  "letters": [
+   "N",
+   "S"
+  ]
+ },
+ {
+  "id": "q9",
+  "dim": "SN",
+  "scenes": [
+   "woman reviewing a clear checklist on a tidy desk",
+   "woman looking at a big mind map wall full of ideas"
+  ],
+  "letters": [
+   "S",
+   "N"
+  ]
+ },
+ {
+  "id": "q10",
+  "dim": "SN",
+  "scenes": [
+   "friends in an animated discussion of big what-if ideas, with sketches and glowing symbols",
+   "woman sharing hands-on practical experience with friends, demonstrating a craft at a table"
+  ],
+  "letters": [
+   "N",
+   "S"
+  ]
+ },
+ {
+  "id": "q11",
+  "dim": "SN",
+  "scenes": [
+   "woman noticing small details in a new cafe: cups, colors, decorations",
+   "woman standing in a new place absorbing the overall atmosphere, dreamy mood"
+  ],
+  "letters": [
+   "S",
+   "N"
+  ]
+ },
+ {
+  "id": "q12",
+  "dim": "SN",
+  "scenes": [
+   "woman imagining a completely new layout, sketching a bold redesign on a big sheet",
+   "woman fine-tuning one small detail on a tidy working setup, adjusting items on a shelf"
+  ],
+  "letters": [
+   "N",
+   "S"
+  ]
+ },
+ {
+  "id": "q13",
+  "dim": "TF",
+  "scenes": [
+   "woman writing a pros and cons list on paper",
+   "woman with a hand on her heart, eyes closed, calm at sunset"
+  ],
+  "letters": [
+   "T",
+   "F"
+  ]
+ },
+ {
+  "id": "q14",
+  "dim": "TF",
+  "scenes": [
+   "woman hugging a friend and listening warmly",
+   "woman sketching a plan with a friend on paper, solving a problem together"
+  ],
+  "letters": [
+   "F",
+   "T"
+  ]
+ },
+ {
+  "id": "q15",
+  "dim": "TF",
+  "scenes": [
+   "woman giving direct, clear feedback in a meeting, friendly but straightforward",
+   "woman encouraging a colleague with a gentle smile"
+  ],
+  "letters": [
+   "T",
+   "F"
+  ]
+ },
+ {
+  "id": "q16",
+  "dim": "TF",
+  "scenes": [
+   "woman choosing the option that fits people best, discussing warmly with her team",
+   "woman comparing two options with charts on a laptop, analytical"
+  ],
+  "letters": [
+   "F",
+   "T"
+  ]
+ },
+ {
+  "id": "q17",
+  "dim": "TF",
+  "scenes": [
+   "woman reviewing evidence and nodding at a clear argument in a meeting",
+   "woman listening empathetically to someone sharing a personal story"
+  ],
+  "letters": [
+   "T",
+   "F"
+  ]
+ },
+ {
+  "id": "q18",
+  "dim": "TF",
+  "scenes": [
+   "woman looking at an idea with a caring, thoughtful expression, people in the background",
+   "woman testing a prototype on a desk, checking whether it works"
+  ],
+  "letters": [
+   "F",
+   "T"
+  ]
+ },
+ {
+  "id": "q19",
+  "dim": "JP",
+  "scenes": [
+   "woman planning a trip with a printed itinerary and a map",
+   "woman wandering a charming street with a backpack, no fixed plan"
+  ],
+  "letters": [
+   "J",
+   "P"
+  ]
+ },
+ {
+  "id": "q20",
+  "dim": "JP",
+  "scenes": [
+   "woman in a burst of inspired creative work at night, lamp light",
+   "woman working steadily with a calendar and checkmarks"
+  ],
+  "letters": [
+   "P",
+   "J"
+  ]
+ },
+ {
+  "id": "q21",
+  "dim": "JP",
+  "scenes": [
+   "woman quickly reorganizing a schedule on a tablet, calm",
+   "woman curious and smiling as plans change, looking at a new path"
+  ],
+  "letters": [
+   "J",
+   "P"
+  ]
+ },
+ {
+  "id": "q22",
+  "dim": "JP",
+  "scenes": [
+   "woman switching between several open projects with notes and multiple screens",
+   "woman ticking off one finished task on a list at a tidy clear desk"
+  ],
+  "letters": [
+   "P",
+   "J"
+  ]
+ },
+ {
+  "id": "q23",
+  "dim": "JP",
+  "scenes": [
+   "woman with a weekend planner and a few planned activities",
+   "woman lounging at home, relaxed and undecided, sunlight"
+  ],
+  "letters": [
+   "J",
+   "P"
+  ]
+ },
+ {
+  "id": "q24",
+  "dim": "JP",
+  "scenes": [
+   "woman browsing many options and comparing swatches, relaxed and curious",
+   "woman confidently circling one option and closing her laptop, relieved"
+  ],
+  "letters": [
+   "P",
+   "J"
+  ]
+ }
+]

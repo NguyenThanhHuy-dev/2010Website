@@ -5,45 +5,64 @@
   const lc = (s) => s.charAt(0).toLowerCase() + s.slice(1);
   const fill = (t, v) => t.replace(/\{(\w+)\}/g, (_, k) => v[k]);
 
-  // Thiếu content một type thì vẫn render được.
+  // Không có kiểu gần nhất (nhiều trục hòa) hoặc thiếu content: dùng hồ sơ cân bằng.
   function getPersonality(code) {
-    const p = root.PERSONALITIES[code];
+    const p = code && root.PERSONALITIES[code];
     if (p) return p;
     return {
-      code, title: 'Người Độc Đáo', en: 'The Original', subtitle: 'Một sự kết hợp riêng của bạn.',
-      strengths: ['Độc đáo', 'Chân thật', 'Giàu tiềm năng'],
-      description: 'Bạn có sự kết hợp riêng mà không khuôn mẫu nào gói gọn hết.',
-      socialStyle: 'Bạn có cách kết nối riêng với mọi người.', workStyle: 'Bạn làm việc theo cách phù hợp nhất với mình.',
-      loveStyle: 'Bạn yêu theo cách chân thành của riêng bạn.', hiddenStrength: 'Khả năng là chính mình.',
-      encouragement: 'Bạn là một phiên bản không thể thay thế.'
+      code: code || 'XXXX', title: 'Người Cân Bằng', en: 'The Balanced', subtitle: 'Linh hoạt giữa nhiều xu hướng, tùy từng hoàn cảnh.',
+      strengths: ['Linh hoạt', 'Nhìn được nhiều phía', 'Thích ứng tốt'],
+      description: 'Bạn có xu hướng cân bằng giữa nhiều cách nhìn và cách hành động, nên thường thích ứng linh hoạt theo từng hoàn cảnh.',
+      socialStyle: 'Bạn dễ điều chỉnh cách kết nối tùy người và tùy không khí.',
+      workStyle: 'Bạn làm việc tốt khi được linh hoạt chọn cách tiếp cận phù hợp với từng nhiệm vụ.',
+      loveStyle: 'Bạn thường yêu theo cách thích nghi và thấu hiểu nhiều phía.',
+      hiddenStrength: 'Khả năng nhìn nhiều phía của cùng một vấn đề.',
+      encouragement: 'Sự cân bằng của bạn không phải là thiếu rõ ràng. Đó là sự linh hoạt đáng quý.'
     };
   }
 
-  // Mô tả blend: dimension rõ thì nêu nghiêng về đâu, sát 50/50 thì dùng wording cân bằng.
-  function describeBlend(dims, code) {
-    const M = root.MESSAGES, clear = dims.filter((d) => !d.borderline), parts = [];
-    if (clear.length) {
-      const lean = clear.map((d) => M.lean[d.winner]).join('; ');
-      parts.push(`Bạn nghiêng về ${code}, với xu hướng ${lean}.`);
-      const mixed = clear.filter((d) => Math.min(d.pa, d.pb) >= 30).map((d) => (d.winner === d.a ? d.b : d.a));
-      if (mixed.length) parts.push(`Bạn vẫn có khá nhiều đặc điểm của ${mixed.join(' và ')}.`);
-    }
-    dims.filter((d) => d.borderline).forEach((d) => parts.push(M.balanced[d.a + d.b]));
-    return parts.join(' ');
+  // Chế độ hiển thị nhãn: 'is' (rõ), 'nearest' (1 trục cân bằng), 'profile' (từ 2 trục cân bằng hoặc không có kiểu gần nhất).
+  function mode(profile) {
+    if (!profile || !profile.nearestType) return 'profile';
+    if (profile.balancedCount >= 2) return 'profile';
+    return profile.balancedCount === 1 ? 'nearest' : 'is';
   }
 
-  function buildFinalResult(personality, tarot) {
+  // lead: dòng nhỏ phía trên, title: dòng lớn. Không dùng "bạn là" khi chưa chắc.
+  function headline(profile, personality, name) {
+    const who = name ? `${name}, ` : '';
+    const m = mode(profile);
+    if (m === 'is') return { mode: m, lead: `${who}bạn là`, title: personality.title };
+    if (m === 'nearest') return { mode: m, lead: `${who}kiểu gần nhất với bạn:`, title: personality.title };
+    if (profile && profile.nearestType) return { mode: m, lead: `${who}hồ sơ của bạn khá cân bằng. Kiểu gần nhất:`, title: personality.title };
+    return { mode: m, lead: who ? `${who}hồ sơ của bạn` : 'Hồ sơ của bạn', title: 'cân bằng giữa nhiều xu hướng' };
+  }
+
+  // Mô tả từng trục theo mức nghiêng thật; trục cân bằng dùng câu "tùy tình huống".
+  function describeBlend(dims) {
+    const M = root.MESSAGES;
+    return dims.map((d) => {
+      if (d.level === 'balanced') return M.balanced[d.pair];
+      const s = M.levels[d.winner][d.level];
+      return d.certainty === 'low' ? `${s} ${M.lowCertainty}` : s;
+    }).join(' ');
+  }
+
+  function buildFinalResult(personality, tarot, profile) {
     const M = root.MESSAGES, seed = personality.code + tarot.id;
     const bridge = fill(pick(M.bridges, seed), {
       title: personality.title, strength: lc(personality.strengths[0]), kw: lc(tarot.keywords[0])
     });
-    const extraKeys = ['money', 'growth', 'happiness'];
+    const m = mode(profile);
+    const intro = !profile || m === 'is' ? [] : [profile.nearestType
+      ? `Câu trả lời của bạn gần nhất với kiểu ${personality.title}, nên hãy xem đây là bức tranh gần đúng chứ không phải một nhãn cố định.`
+      : 'Câu trả lời của bạn khá cân bằng giữa nhiều xu hướng, nên hãy xem đây là một gợi ý linh hoạt.'];
     const w = tarot.weights || [1, 1, 1, 1, 1];
     const extraW = { money: w[2], growth: w[3], happiness: w[4] };
-    const extra = extraKeys.reduce((best, k) => (extraW[k] > extraW[best] ? k : best), 'growth');
+    const extra = ['money', 'growth', 'happiness'].reduce((best, k) => (extraW[k] > extraW[best] ? k : best), 'growth');
     const extraText = { money: tarot.moneyMessage, growth: tarot.selfGrowthMessage, happiness: tarot.happinessMessage }[extra];
     return {
-      message: [personality.description, tarot.personalityMessage, bridge].join(' '),
+      message: [...intro, personality.description, tarot.personalityMessage, bridge].join(' '),
       future: tarot.futureGeneral,
       love: `${personality.loveStyle} ${tarot.loveMessage}`,
       career: `${personality.workStyle} ${tarot.careerMessage}`,
@@ -52,7 +71,7 @@
     };
   }
 
-  const api = { getPersonality, describeBlend, buildFinalResult };
+  const api = { getPersonality, mode, headline, describeBlend, buildFinalResult };
   root.Compose = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(globalThis);

@@ -1,0 +1,123 @@
+# Sinh data/questions.js (v2) từ bảng gọn bên dưới. Chạy: python3 tests/tools/gen-questions.py
+import json, os
+# id, dimension, anchor, text, (A text, A letter, A scene), (B text, B letter, B scene), C text, swap
+Q = [
+('q1','EI',True,'Sau một tuần bận rộn, cách nào giúp bạn hồi lại năng lượng tự nhiên hơn?',
+ ('Gặp gỡ hoặc làm gì đó cùng người khác.','E','friends gathered at a candle-lit dinner table under string lights, laughing'),
+ ('Có khoảng thời gian riêng, ít tương tác.','I','woman reading alone by a sunny window with a cup of tea'),
+ 'Tùy tuần; hai cách gần như ngang nhau.',False),
+('q2','EI',False,'Khi bước vào một nhóm mà bạn chưa quen nhiều người:',
+ ('Tôi thường quan sát trước, rồi mới tham gia khi thấy phù hợp.','I','woman quietly observing a party from a corner, chatting with just two friends'),
+ ('Tôi khá tự nhiên trong việc mở lời và tạo cuộc trò chuyện.','E','woman confidently greeting new people at a lively party with a glass in hand'),
+ 'Tùy nhóm và hoàn cảnh.',False),
+('q3','EI',False,'Khi một ý tưởng mới vừa xuất hiện:',
+ ('Nói ra với ai đó thường giúp tôi nghĩ rõ hơn.','E','woman sharing an idea excitedly with friends around a cafe table, sticky notes'),
+ ('Tôi muốn tự sắp xếp suy nghĩ trước rồi mới chia sẻ.','I','woman thinking quietly with a notebook by a window'),
+ 'Tôi dùng cả hai cách gần như ngang nhau.',False),
+('q4','EI',False,'Nếu có vài giờ hoàn toàn rảnh và không có nghĩa vụ gì:',
+ ('Tôi dễ muốn tìm ai đó để cùng đi đâu hoặc làm gì.','E','woman texting friends on her phone, smiling, planning an outing together'),
+ ('Tôi thường tận hưởng hoạt động một mình trước.','I','woman enjoying a solo hobby, painting or walking alone in a quiet park'),
+ 'Tôi không nghiêng rõ về bên nào.',True),
+('q5','EI',False,'Sau một buổi tương tác xã hội kéo dài:',
+ ('Tôi thường vẫn thấy có năng lượng và muốn tiếp tục kết nối.','E','woman still glowing and chatting happily with friends at the end of a party night'),
+ ('Tôi thường cần một khoảng yên tĩnh để hồi lại năng lượng.','I','woman alone on a quiet balcony at night with tea, calm and relaxed'),
+ 'Tùy người và không khí của buổi gặp.',False),
+('q6','EI',False,'Khi gặp một vấn đề khó và chưa biết bắt đầu từ đâu:',
+ ('Tôi thường suy nghĩ một mình trước rồi mới hỏi ý kiến.','I','woman thinking alone at a desk with a notebook, focused on a tricky problem'),
+ ('Tôi thường trao đổi với người khác để hình thành suy nghĩ.','E','woman discussing a problem with colleagues around a whiteboard'),
+ 'Hai cách đều tự nhiên với tôi.',False),
+('q7','SN',True,'Khi học một thứ hoàn toàn mới, điều gì giúp bạn bắt nhịp nhanh hơn?',
+ ('Ví dụ cụ thể và hướng dẫn từng bước.','S','woman following a recipe step by step in a bright kitchen'),
+ ('Hiểu nguyên lý, mô hình hoặc ý tưởng đằng sau.','N','woman sketching a concept diagram on paper, thoughtful'),
+ 'Tôi cần cả hai gần như ngang nhau.',False),
+('q8','SN',False,'Khi nhớ lại một sự việc đã xảy ra:',
+ ('Tôi thường nhớ khá rõ chi tiết, diễn biến hoặc điều đã được nói.','S','woman flipping through a detailed photo album with dates and notes'),
+ ('Tôi thường nhớ ý nghĩa, ấn tượng hoặc điều mình liên tưởng từ nó.','N','woman smiling softly, remembering a feeling, dreamy golden light and floating petals'),
+ 'Hai kiểu nhớ xuất hiện tương đương.',True),
+('q9','SN',False,'Khi bắt đầu một dự án:',
+ ('Tôi muốn biết các điều kiện thực tế và việc nào làm được ngay.','S','woman reviewing a clear checklist on a tidy desk'),
+ ('Tôi dễ nghĩ đến các khả năng mới và hướng có thể phát triển.','N','woman looking at a big mind map wall full of ideas'),
+ 'Tôi thường cân nhắc hai phía cùng lúc.',False),
+('q10','SN',False,'Cuộc trò chuyện nào thường giữ sự chú ý của bạn lâu hơn?',
+ ('Những trải nghiệm cụ thể, điều đang xảy ra hoặc cách làm thực tế.','S','woman sharing hands-on practical experience with friends, demonstrating a craft at a table'),
+ ('Những ý tưởng, giả thuyết, biểu tượng hoặc câu hỏi “nếu như…”.','N','friends in an animated discussion of big what-if ideas, with sketches and glowing symbols'),
+ 'Tôi thích cả hai gần như ngang nhau.',True),
+('q11','SN',False,'Khi quan sát một nơi mới:',
+ ('Tôi dễ để ý các chi tiết cụ thể: bố cục, vật dụng, âm thanh, màu sắc.','S','woman noticing small details in a new cafe: cups, colors, decorations'),
+ ('Tôi dễ để ý cảm giác tổng thể, ý nghĩa hoặc những liên hệ gợi ra.','N','woman standing in a new place absorbing the overall atmosphere, dreamy mood'),
+ 'Tôi nhận thấy cả hai kiểu thông tin tương đương.',False),
+('q12','SN',False,'Khi cần nghĩ cách cải thiện một việc quen thuộc:',
+ ('Tôi thường bắt đầu từ những gì đang hoạt động và chỉnh từng điểm cụ thể.','S','woman fine-tuning one small detail on a tidy working setup, adjusting items on a shelf'),
+ ('Tôi thường hình dung một cách làm khác hẳn hoặc một khả năng mới.','N','woman imagining a completely new layout, sketching a bold redesign on a big sheet'),
+ 'Tôi dùng cả hai cách tùy bài toán.',True),
+('q13','TF',True,'Khi phải đưa ra một quyết định khó ảnh hưởng đến nhiều người, bạn ưu tiên điều gì trước?',
+ ('Tiêu chí nhất quán, hợp lý và có thể giải thích rõ.','T','woman writing a pros and cons list on paper'),
+ ('Tác động lên từng người và điều phù hợp với các giá trị quan trọng.','F','woman with a hand on her heart, eyes closed, calm at sunset'),
+ 'Tôi cân nhắc hai phía gần như ngang nhau.',False),
+('q14','TF',False,'Khi một người thân kể về vấn đề của họ:',
+ ('Phản xạ đầu tiên của tôi thường là tìm cách phân tích nguyên nhân hoặc giải pháp.','T','woman sketching a plan with a friend on paper, solving a problem together'),
+ ('Phản xạ đầu tiên của tôi thường là hiểu cảm xúc và điều họ đang cần.','F','woman hugging a friend and listening warmly'),
+ 'Tôi thường làm cả hai gần như cùng lúc.',True),
+('q15','TF',False,'Khi góp ý một lỗi có thể ảnh hưởng đến kết quả chung:',
+ ('Tôi ưu tiên nói rõ vấn đề và điều cần sửa, dù cách nói có thể hơi thẳng.','T','woman giving direct, clear feedback in a meeting, friendly but straightforward'),
+ ('Tôi ưu tiên cách nói để người nghe vẫn cảm thấy được tôn trọng và có động lực sửa.','F','woman encouraging a colleague with a gentle smile'),
+ 'Tôi cân bằng hai ưu tiên này khá ngang nhau.',False),
+('q16','TF',False,'Khi hai phương án đều có ưu điểm:',
+ ('Tôi dễ nghiêng về phương án có logic, tiêu chí và hiệu quả thuyết phục hơn.','T','woman comparing two options with charts on a laptop, analytical'),
+ ('Tôi dễ nghiêng về phương án phù hợp hơn với con người và giá trị mà tôi coi trọng.','F','woman choosing the option that fits people best, discussing warmly with her team'),
+ 'Tôi thường cần cả hai đạt mức chấp nhận được.',True),
+('q17','TF',False,'Trong một cuộc tranh luận, điều nào khiến bạn dễ đổi ý hơn?',
+ ('Một lập luận chặt chẽ hoặc bằng chứng tốt hơn.','T','woman reviewing evidence and nodding at a clear argument in a meeting'),
+ ('Một góc nhìn giúp tôi hiểu sâu hơn trải nghiệm và giá trị của người liên quan.','F','woman listening empathetically to someone sharing a personal story'),
+ 'Tùy chủ đề; hai loại lý do đều có sức nặng.',False),
+('q18','TF',False,'Khi đánh giá một ý tưởng, câu hỏi nào thường đến trước hơn?',
+ ('“Nó có hợp lý và hoạt động tốt không?”','T','woman testing a prototype on a desk, checking whether it works'),
+ ('“Nó có phù hợp với con người và điều mình coi trọng không?”','F','woman looking at an idea with a caring, thoughtful expression, people in the background'),
+ 'Hai câu hỏi thường xuất hiện gần như cùng lúc.',True),
+('q19','JP',True,'Khi đi du lịch, kiểu chuẩn bị nào khiến bạn thoải mái hơn?',
+ ('Có lịch trình và các mốc chính được chốt trước.','J','woman planning a trip with a printed itinerary and a map'),
+ ('Chỉ chốt phần cần thiết, còn lại quyết định theo tình hình.','P','woman wandering a charming street with a backpack, no fixed plan'),
+ 'Tôi thích mức chuẩn bị ở giữa hai cách này.',False),
+('q20','JP',False,'Với một hạn chót còn khá xa:',
+ ('Tôi thường muốn bắt đầu sớm và chia việc thành các bước.','J','woman working steadily with a calendar and checkmarks'),
+ ('Tôi thường để không gian linh hoạt rồi tăng tốc khi gần hạn hoặc có cảm hứng.','P','woman in a burst of inspired creative work at night, lamp light'),
+ 'Tùy loại việc; không nghiêng rõ về bên nào.',True),
+('q21','JP',False,'Khi kế hoạch trong ngày thay đổi bất ngờ:',
+ ('Tôi thường nhanh chóng sắp xếp lại một kế hoạch mới để giữ nhịp.','J','woman quickly reorganizing a schedule on a tablet, calm'),
+ ('Tôi thường ứng biến theo tình hình và xem điều gì thuận tiện nhất lúc đó.','P','woman curious and smiling as plans change, looking at a new path'),
+ 'Cả hai cách đều khá tự nhiên với tôi.',False),
+('q22','JP',False,'Khi có nhiều việc đang mở cùng lúc:',
+ ('Tôi thấy dễ chịu hơn khi lần lượt chốt xong từng việc.','J','woman ticking off one finished task on a list at a tidy clear desk'),
+ ('Tôi thấy tự nhiên khi giữ nhiều lựa chọn mở và chuyển qua lại giữa chúng.','P','woman switching between several open projects with notes and multiple screens'),
+ 'Tôi ở khoảng giữa hai cách này.',True),
+('q23','JP',False,'Một ngày cuối tuần lý tưởng với bạn thường là:',
+ ('Có vài việc hoặc mốc đã định trước để ngày trôi có nhịp.','J','woman with a weekend planner and a few planned activities'),
+ ('Để phần lớn thời gian mở rồi xem lúc đó muốn làm gì.','P','woman lounging at home, relaxed and undecided, sunlight'),
+ 'Có một chút kế hoạch và một chút ngẫu hứng.',False),
+('q24','JP',False,'Khi đứng trước một quyết định chưa cần chốt ngay:',
+ ('Tôi thường thấy nhẹ đầu hơn khi sớm thu hẹp lựa chọn và quyết định.','J','woman confidently circling one option and closing her laptop, relieved'),
+ ('Tôi thường thích giữ thêm lựa chọn mở cho đến khi có thêm thông tin.','P','woman browsing many options and comparing swatches, relaxed and curious'),
+ 'Tùy mức quan trọng của quyết định.',True),
+]
+def lit(s): return json.dumps(s, ensure_ascii=False)
+out = ["// Bộ câu hỏi v2. Sinh bởi tests/tools/gen-questions.py (hoặc sửa tay trực tiếp file này).",
+"// Mỗi câu đo ĐÚNG MỘT cặp (dimension). Đáp án nghiêng 1 phía: +2 phía đó, +0 phía kia. Đáp án trung tính (neutral): +1 cho cả hai.",
+"// anchor: true = câu dùng để hòa giải khi một trục hòa tuyệt đối. scene = prompt ảnh minh họa (docs/image-prompts-quiz-v2.md).",
+"// Thứ tự đáp án trong mảng = thứ tự hiển thị; điểm đi cùng nội dung đáp án nên đảo A/B thoải mái. Đáp án neutral luôn đặt cuối.",
+"globalThis.QUIZ_QUESTIONS = ["]
+for i,(qid,dim,anchor,text,A,B,C,swap) in enumerate(Q):
+    l1,l2=dim[0],dim[1]
+    def ans(t,l,s):
+        p=l2 if l==l1 else l1
+        return f"      {{ text: {lit(t)}, scores: {{ {l}: 2, {p}: 0 }}, scene: {lit(s)} }}"
+    first,second=(B,A) if swap else (A,B)
+    neutral=f"      {{ text: {lit(C)}, scores: {{ {l1}: 1, {l2}: 1 }}, neutral: true }}"
+    out.append(f"  {{ id: '{qid}', dimension: '{dim}',{' anchor: true,' if anchor else ''} text: {lit(text)}, answers: [")
+    out.append(ans(*first)+",")
+    out.append(ans(*second)+",")
+    out.append(neutral+" ] }"+(',' if i<len(Q)-1 else ''))
+out.append("];")
+open('data/questions.js','w').write("\n".join(out)+"\n")
+# bảng scene đã hiển thị theo thứ tự (để sinh prompt ảnh)
+json.dump([{ 'id':q[0],'dim':q[1],'scenes':[(q[5] if q[7] else q[4])[2],(q[4] if q[7] else q[5])[2]],'letters':[(q[5] if q[7] else q[4])[1],(q[4] if q[7] else q[5])[1]]} for q in Q],open('tests/tools/scenes.json','w'),ensure_ascii=False,indent=1)
+print('ok',len(Q))

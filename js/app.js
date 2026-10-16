@@ -13,7 +13,8 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const chips = (arr, cls = '') => `<ul class="chips">${arr.map((x) => `<li class="chip ${cls}">${esc(x)}</li>`).join('')}</ul>`;
   const cardAlt = (c) => `Lá bài ${c.vietnameseName} (${c.name}): ${c.keywords.join(', ')}`;
-  const youAre = () => (playerName ? `${esc(playerName)}, bạn là` : 'Bạn là');
+  const head = () => Compose.headline(state.type, state.personality, playerName);
+  const headText = () => { const h = head(); return esc(`${h.lead} ${h.title}`); };
 
   const ICONS = {
     explore: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
@@ -31,7 +32,44 @@
   };
   const icon = (n) => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
 
+  // ---------- tải trước ảnh ----------
+  const imgCache = new Map();
+  function loadImg(src) {
+    if (!src) return Promise.resolve();
+    if (!imgCache.has(src)) {
+      imgCache.set(src, new Promise((res) => {
+        const i = new Image();
+        i.onload = () => (i.decode ? i.decode() : Promise.resolve()).catch(() => {}).then(res);
+        i.onerror = res; // thiếu ảnh thì thôi, không chặn người chơi
+        i.src = src;
+      }));
+    }
+    return imgCache.get(src);
+  }
+  const withTimeout = (p, ms) => Promise.race([p, new Promise((r) => setTimeout(r, ms))]);
+  const WAIT_MS = 4000; // mạng quá yếu thì vẫn cho đi tiếp
+  const quizImgs = (q) => (q && SITE && SITE.quizImages ? q.answers.flatMap((a, i) => (a.neutral ? [] : [`images/quiz/${q.id}-${i}.jpg`])) : []);
+  const preloadQuestion = (i) => quizImgs(state.order[i]).forEach(loadImg);
+  const setBusy = (btn, on) => {
+    state.busy = on;
+    if (!btn || !btn.isConnected) return;
+    if (on) { btn.dataset.label = btn.textContent; btn.textContent = 'Đang tải…'; btn.disabled = true; }
+    else { btn.textContent = btn.dataset.label || btn.textContent; btn.disabled = false; }
+  };
+
+  // Chỉ chuyển câu khi ảnh của câu đó đã tải và giải mã xong (hoặc quá thời gian chờ).
+  async function goQuiz(target, btn) {
+    if (state.busy) return;
+    setBusy(btn, true);
+    await withTimeout(Promise.all(quizImgs(state.order[target]).map(loadImg)), WAIT_MS);
+    state.busy = false;
+    state.current = target;
+    go('quiz');
+    preloadQuestion(target + 1);
+  }
+
   function go(screen) {
+    state.busy = false;
     state.screen = screen;
     document.body.dataset.theme = screen.startsWith('tarot') ? 'dark' : 'light';
     render();
@@ -94,8 +132,8 @@
         <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${state.current + 1}"><span style="width:${((state.current + 1) / total) * 100}%"></span></div>
         <h2 class="q-text" id="qtext" tabindex="-1" data-focus>${esc(q.text)}</h2>
         <ul class="options ${imgs ? 'imgs' : ''}">${q.answers.map((a, i) => `
-          <li><button class="option" data-act="answer" data-i="${i}" aria-pressed="${sel === i}">
-            ${imgs ? `<img class="opt-img" src="images/quiz/${esc(q.id)}-${i}.jpg" alt="" onerror="this.remove()">` : ''}
+          <li><button class="option${a.neutral ? ' neutral' : ''}" data-act="answer" data-i="${i}" aria-pressed="${sel === i}">
+            ${imgs && !a.neutral ? `<img class="opt-img" src="images/quiz/${esc(q.id)}-${i}.jpg" alt="" onerror="this.remove()">` : ''}
             <span class="opt-body"><span class="mark" aria-hidden="true">${sel === i ? '✓' : 'ABCD'[i]}</span><span>${esc(a.text)}</span></span></button></li>`).join('')}</ul>
         <div class="nav">
           <button class="btn ghost" data-act="back" ${state.current === 0 ? 'disabled' : ''}>← Quay lại</button>
@@ -106,26 +144,27 @@
     },
 
     'personality-result': () => {
-      const p = state.personality, t = state.type;
+      const p = state.personality, t = state.type, h = head();
+      const portrait = t.nearestType ? `<figure class="portrait"><img src="images/personality/${esc(p.code)}.jpg" alt="Hình minh họa ${esc(p.title)}" onerror="this.closest('figure').remove()"></figure>` : '';
       return `
       <section class="screen">
         <div class="center">
-          <span class="tagchip">Kết quả tính cách</span>
-          <p class="fine" style="margin:0">${youAre()}</p>
-          <h2 class="big-title" tabindex="-1" data-focus>${esc(p.title)}</h2>
-          <p class="code">(${esc(p.code)}) · ${esc(p.en)}</p>
+          <span class="tagchip">${h.mode === 'profile' ? 'Hồ sơ tính cách' : 'Kết quả tính cách'}</span>
+          <p class="fine" style="margin:0">${esc(h.lead)}</p>
+          <h2 class="big-title" tabindex="-1" data-focus>${esc(h.title)}</h2>
+          <p class="code">${t.nearestType ? `(${esc(p.code)}) · ${esc(p.en)}` : esc(p.en)}</p>
           <p>${esc(p.subtitle)}</p>
         </div>
         <div class="pr-body">
-          <figure class="portrait"><img src="images/personality/${esc(p.code)}.jpg" alt="Hình minh họa ${esc(p.title)}" onerror="this.closest('figure').remove()"></figure>
+          ${portrait}
           <div class="pr-text">
-            <p>${esc(p.description)}</p>
-            ${chips(p.strengths)}
+            ${h.mode === 'profile' ? '' : `<p>${esc(p.description)}</p>${chips(p.strengths)}`}
+            <div class="bars">${t.dims.map(barRow).join('')}</div>
+            <p>${esc(Compose.describeBlend(t.dims))}</p>
+            ${h.mode === 'profile' ? `${chips(p.strengths)}<p>${esc(p.description)}</p>` : ''}
             <p><strong>Khi kết nối:</strong> ${esc(p.socialStyle)}</p>
             <p><strong>Điều ít ai thấy:</strong> ${esc(p.hiddenStrength)}</p>
-            <p>${esc(Compose.describeBlend(t.dims, t.code))}</p>
-            <div class="bars">${t.dims.map(barRow).join('')}</div>
-            <p class="fine">Mô hình lấy cảm hứng từ các nhóm tính cách, không phải kết quả MBTI chính thức.</p>
+            <p class="fine">Tỉ lệ là điểm trong bài test vui này, không phải xác suất hay kết quả MBTI chính thức.</p>
           </div>
         </div>
         <p class="note">${esc(p.encouragement)}</p>
@@ -164,10 +203,10 @@
       <section class="screen final-box">
         <div class="center">
           <span class="tagchip">Kết quả hoàn chỉnh</span>
-          <h2 tabindex="-1" data-focus>${youAre()} ${esc(p.title)}<br>và lá bài của bạn là ${esc(c.name)}</h2>
+          <h2 tabindex="-1" data-focus>${headText()}<br>và lá bài của bạn là ${esc(c.name)}</h2>
           <p>${esc(p.subtitle)}</p>
           <div class="thumbs">
-            <div class="thumb"><div class="mini-portrait"><span>${esc(p.code[0])}</span><img src="images/personality/${esc(p.code)}.jpg" alt="" onerror="this.remove()" style="position:absolute;width:78px;height:78px"></div>${esc(p.title)}</div>
+            ${state.type.nearestType ? `<div class="thumb"><figure class="portrait mini"><img src="images/personality/${esc(p.code)}.jpg" alt="" onerror="this.closest('.thumb').remove()"></figure>${esc(p.title)}</div>` : ''}
             <div class="thumb">${tarotCard(c, 0, c, true)}${esc(c.vietnameseName)}</div>
           </div>
         </div>
@@ -198,8 +237,7 @@
         ${state.shareUrl ? `<img class="share-img" src="${state.shareUrl}" alt="Ảnh kết quả: ${esc(state.personality.title)}, lá bài ${esc(state.selected.name)}">` : '<div class="share-img" aria-busy="true"></div>'}
         <div class="btn-row">
           <button class="btn" data-act="download" ${state.shareUrl ? '' : 'disabled'}>${icon('download')} Tải ảnh</button>
-          <button class="btn ghost" data-act="native-share" ${state.shareUrl ? '' : 'disabled'}>${icon('share')} Chia sẻ</button>
-          <a class="btn ghost" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href.split('#')[0])}" target="_blank" rel="noopener">Facebook</a>
+          <a class="btn ghost" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href.split('#')[0])}" target="_blank" rel="noopener">${icon('share')} Chia sẻ Facebook</a>
           <button class="btn ghost" data-act="back-final">← Xem lại kết quả</button>
           <button class="btn ghost" data-act="restart">${icon('refresh')} Chơi lại</button>
         </div>
@@ -208,9 +246,11 @@
   };
 
   function barRow(d) {
-    const L = M.dimLabels, note = d.borderline ? ' (cân bằng)' : '';
-    return `<div class="bar-row"><div class="labels"><span>${L[d.a]} ${d.pa}%</span><span>${L[d.b]} ${d.pb}%${note}</span></div>
-      <div class="bar" role="img" aria-label="${L[d.a]} ${d.pa}%, ${L[d.b]} ${d.pb}%"><i style="width:${d.pa}%"></i><span class="mid"></span></div></div>`;
+    const L = M.dimLabels, lvl = M.levelLabels[d.level];
+    const tag = d.level === 'balanced' ? `${lvl}, tùy bối cảnh` : `${lvl} ${L[d.winner]}`;
+    return `<div class="bar-row"><div class="labels"><span>${L[d.a]} ${d.pa}%</span><span>${L[d.b]} ${d.pb}%</span></div>
+      <div class="bar" role="img" aria-label="${L[d.a]} ${d.pa}%, ${L[d.b]} ${d.pb}%"><i style="width:${d.pa}%"></i><span class="mid"></span></div>
+      <div class="lvl">${esc(tag)}</div></div>`;
   }
 
   function tarotCard(c, i, sel, forceFlip) {
@@ -232,13 +272,16 @@
     state = fresh();
     state.order = Engine.interleave(QUIZ_QUESTIONS);
     trackEvent('quiz_started');
-    go('quiz');
+    goQuiz(0, $app.querySelector('.name-form .btn'));
   }
 
-  function finishQuiz() {
+  async function finishQuiz(btn) {
+    if (state.busy) return;
     state.type = Engine.resolveType(QUIZ_QUESTIONS, state.answers);
-    state.personality = Compose.getPersonality(state.type.code);
-    trackEvent('quiz_completed', { code: state.type.code, scores: state.type.scores });
+    state.personality = Compose.getPersonality(state.type.nearestType);
+    trackEvent('quiz_completed', { code: state.type.code, nearest: state.type.nearestType, scores: state.type.scores });
+    setBusy(btn, true);
+    if (state.type.nearestType) await withTimeout(loadImg(`images/personality/${state.personality.code}.jpg`), WAIT_MS);
     go('personality-result');
   }
 
@@ -268,13 +311,15 @@
       el.classList.toggle('chosen', chosen); el.classList.toggle('glow', chosen); el.classList.toggle('dim', !chosen);
       if (chosen) setTimeout(() => el.classList.add('flipped'), 350);
     });
-    setTimeout(() => {
+    const imgReady = withTimeout(loadImg(card.image), WAIT_MS);
+    setTimeout(async () => {
+      await imgReady; // lá bài lớn chỉ hiện khi ảnh đã sẵn sàng
       if (state.screen === 'tarot-reveal' && state.selected === card) { state.revealed = true; render(); focusHeading(); }
     }, 1700);
   }
 
   function showFinal() {
-    state.final = Compose.buildFinalResult(state.personality, state.selected);
+    state.final = Compose.buildFinalResult(state.personality, state.selected, state.type);
     trackEvent('result_viewed', { code: state.personality.code, tarot: state.selected.id });
     go('final-result');
   }
@@ -288,6 +333,15 @@
     }
     if (line) { ctx.fillText(line, x, y); y += lh; }
     return y;
+  }
+
+  function loadPhoto(src) {
+    return new Promise((res) => {
+      if (!src) return res(null);
+      const img = new Image();
+      img.onload = () => res(img); img.onerror = () => res(null);
+      img.src = src;
+    });
   }
 
   function loadSvg(svg) {
@@ -307,7 +361,7 @@
     ctx.textAlign = 'left'; ctx.fillStyle = '#b88a3e'; ctx.font = '700 64px Georgia, serif'; ctx.fillText('20.10', 90, 150);
     ctx.fillStyle = '#7a2a43'; ctx.font = '500 28px sans-serif';
     if (playerName) { ctx.textAlign = 'right'; ctx.fillText(playerName, S - 90, 150); ctx.textAlign = 'left'; }
-    ctx.fillText('TÔI LÀ', 90, 270);
+    ctx.fillText(Compose.mode(state.type) === 'is' ? 'TÔI LÀ' : 'KIỂU GẦN NHẤT CỦA TÔI', 90, 270);
     ctx.font = '700 62px Georgia, serif';
     let y = wrap(ctx, p.title.toUpperCase() + ' ✨', 90, 340, 520, 74);
     ctx.fillStyle = '#a8465f'; ctx.font = '500 28px sans-serif'; ctx.fillText(p.en, 90, y + 4);
@@ -316,8 +370,16 @@
     ctx.fillStyle = '#8a5a6b'; ctx.font = 'italic 32px Georgia, serif';
     wrap(ctx, `“${c.encouragement}”`, 90, Math.max(y + 40, 800), 520, 44);
     ctx.fillStyle = '#6a2340'; ctx.fillRect(660, 170, 330, 495);
-    const img = await loadSvg(Art.cardArt(c));
-    if (img) ctx.drawImage(img, 660, 170, 330, 495);
+    const photo = await loadPhoto(c.image);
+    if (photo) {
+      // cover: cắt giữa cho vừa khung 2:3, bo góc
+      const W = 330, H = 495, k = Math.max(W / photo.width, H / photo.height), sw = W / k, sh = H / k;
+      ctx.save(); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(660, 170, W, H, 18) : ctx.rect(660, 170, W, H); ctx.clip();
+      ctx.drawImage(photo, (photo.width - sw) / 2, (photo.height - sh) / 2, sw, sh, 660, 170, W, H); ctx.restore();
+    } else {
+      const art = await loadSvg(Art.cardArt(c)); // dự phòng khi thiếu ảnh
+      if (art) ctx.drawImage(art, 660, 170, 330, 495);
+    }
     return new Promise((res) => cv.toBlob(res, 'image/png'));
   }
 
@@ -338,20 +400,13 @@
     const a = document.createElement('a'); a.href = state.shareUrl; a.download = '20-10-ket-qua.png'; a.click();
   }
 
-  async function nativeShare() {
-    const file = new File([state.shareBlob], '20-10-ket-qua.png', { type: 'image/png' });
-    try {
-      if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: '20/10 – Vũ trụ muốn nhắn gì với bạn?' });
-      else download();
-    } catch (e) { /* người dùng đóng hộp thoại chia sẻ */ }
-  }
-
   // ---------- events ----------
   $app.addEventListener('click', (e) => {
     const el = e.target.closest('[data-act]');
     if (!el || el.disabled) return;
     const act = el.dataset.act;
     if (act === 'answer') {
+      if (state.busy) return;
       const q = state.order[state.current];
       state.answers[q.id] = +el.dataset.i;
       trackEvent('question_answered', { id: q.id, answer: +el.dataset.i });
@@ -364,14 +419,16 @@
       const next = $app.querySelector('[data-act="next"]');
       if (next) { next.disabled = false; next.focus({ preventScroll: true }); }
     }
-    else if (act === 'next') { if (state.answers[state.order[state.current].id] === undefined) return; state.current + 1 < state.order.length ? (state.current++, go('quiz')) : finishQuiz(); }
-    else if (act === 'back') { if (state.current > 0) { state.current--; go('quiz'); } }
+    else if (act === 'next') {
+      if (state.busy || state.answers[state.order[state.current].id] === undefined) return;
+      state.current + 1 < state.order.length ? goQuiz(state.current + 1, el) : finishQuiz(el);
+    }
+    else if (act === 'back') { if (!state.busy && state.current > 0) goQuiz(state.current - 1, el); }
     else if (act === 'to-tarot' || act === 'again') dealTarot();
     else if (act === 'pick') pickCard(el.dataset.id);
     else if (act === 'to-final') showFinal();
     else if (act === 'share') openShare();
     else if (act === 'download') download();
-    else if (act === 'native-share') nativeShare();
     else if (act === 'back-final') go('final-result');
     else if (act === 'restart') { trackEvent('restart_clicked'); state = fresh(); go('landing'); }
   });
@@ -388,4 +445,6 @@
   }
 
   render();
+  // Tải sẵn 2 câu đầu lúc người chơi còn đang nhập tên.
+  Engine.interleave(QUIZ_QUESTIONS).slice(0, 2).forEach((q) => quizImgs(q).forEach(loadImg));
 })();
