@@ -230,10 +230,10 @@ svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-wid
 .love-scene { max-width: 720px; margin: 28px auto 0; overflow-x: clip; animation: rise .8s ease both; }
 .ps { width: 100%; }
 @media (max-width: 600px) { .ps { width: 122%; margin-left: -11%; } }
-.ps-top { aspect-ratio: 1024 / 770; background: url(../images/love/letter-top.jpg) center / 100% 100% no-repeat; }
+.ps-top { aspect-ratio: 887 / 700; background: url(../images/love/letter-top.jpg) center / 100% 100% no-repeat; }
 .ps-mid { display: flow-root; background: url(../images/love/letter-mid.jpg) center / 100% 100% no-repeat; margin: -1px 0; }
-.ps-content { margin: -31% 0 -3%; padding: 0 22% 0 21%; position: relative; text-align: center; }
-.ps-bot { aspect-ratio: 1024 / 724; background: url(../images/love/letter-bot.jpg) center / 100% 100% no-repeat; }
+.ps-content { margin: -40.6% 0 -8%; padding: 0 21%; position: relative; text-align: center; }
+.ps-bot { aspect-ratio: 887 / 774; background: url(../images/love/letter-bot.jpg) center / 100% 100% no-repeat; }
 .ps .polaroid { width: min(64%, 230px); margin: 0 auto 22px; }
 .ps .letter { font-size: clamp(1.2rem, 4.3vw, 1.65rem); line-height: 1.5; max-width: none; }
 .love-scene .btn-row { margin-top: -6%; position: relative; }
