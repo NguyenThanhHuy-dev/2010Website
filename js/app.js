@@ -61,24 +61,17 @@
     m.querySelector('.love-close').focus();
   }
 
-  const BOW = `<svg class="bow" viewBox="0 0 120 72" aria-hidden="true"><defs><linearGradient id="rb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1b9c4"/><stop offset="1" stop-color="#d98ca0"/></linearGradient></defs>
-    <path d="M56 38C50 52 44 60 36 68l14-4 6 6c2-12 4-22 4-30z" fill="url(#rb)" stroke="#c9788a" stroke-width=".8"/><path d="M64 38c6 14 12 22 20 30l-14-4-6 6c-2-12-4-22-4-30z" fill="url(#rb)" stroke="#c9788a" stroke-width=".8"/>
-    <path d="M60 32C40 6 6 8 12 32c4 16 32 10 48 0z" fill="url(#rb)" stroke="#c9788a" stroke-width=".8"/><path d="M60 32c20-26 54-24 48 0-4 16-32 10-48 0z" fill="url(#rb)" stroke="#c9788a" stroke-width=".8"/>
-    <ellipse cx="60" cy="33" rx="8" ry="7" fill="#e49bad" stroke="#c9788a" stroke-width=".8"/></svg>`;
-  const SPRIG = `<svg class="sprig" viewBox="0 0 90 100" aria-hidden="true"><g fill="none" stroke="#8aa07a" stroke-width="1.4" stroke-linecap="round"><path d="M14 96C22 70 40 44 74 14"/><path d="M26 74c-8-2-12-8-12-14M38 58c-8 0-14-5-15-12M50 44c-6 0-12-4-13-10M30 70c8-2 12-8 12-14M44 54c8 0 13-5 14-11"/></g>
-    <g fill="#fff" stroke="#e7a3b1" stroke-width="1"><circle cx="76" cy="12" r="5"/><circle cx="62" cy="24" r="4.5"/><circle cx="52" cy="38" r="4"/><circle cx="68" cy="30" r="3.5"/><circle cx="44" cy="52" r="3.5"/></g><g fill="#f0b8c2"><circle cx="76" cy="12" r="1.6"/><circle cx="62" cy="24" r="1.5"/><circle cx="52" cy="38" r="1.4"/></g></svg>`;
-
   function loveSection() {
     return `
       <section class="love-scene" aria-label="Lá thư dành cho bạn">
-        <div class="sheet-back sheet-pink" aria-hidden="true"></div><div class="sheet-back sheet-gingham" aria-hidden="true"></div>
-        <article class="sheet">
-          ${BOW}
-          ${lovePhoto ? `<figure class="polaroid"><img src="${lovePhoto}" alt="${esc(LOVE.photoAlt)}"></figure>` : ''}
-          <div class="letter">${LOVE.letter.map((p, i) => `<p style="--n:${i}">${esc(p)}</p>`).join('')}</div>
-          ${SPRIG}
-          <span class="seal" aria-hidden="true">♥</span>
-        </article>
+        <div class="ps">
+          <div class="ps-top" aria-hidden="true"></div>
+          <article class="ps-mid"><div class="ps-content">
+            ${lovePhoto ? `<figure class="polaroid"><img src="${lovePhoto}" alt="${esc(LOVE.photoAlt)}"></figure>` : ''}
+            <div class="letter">${LOVE.letter.map((p, i) => `<p style="--n:${i}">${esc(p)}</p>`).join('')}</div>
+          </div></article>
+          <div class="ps-bot" aria-hidden="true"></div>
+        </div>
         <div class="btn-row"><button class="btn" data-act="love-ok">${esc(LOVE.button)}</button></div>
       </section>`;
   }

@@ -218,19 +218,6 @@ svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-wid
 @keyframes floatUp { 0% { transform: translateY(0) scale(.8); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-420px) scale(1.2); opacity: 0; } }
 
 /* ---- thư trên giấy viết thư ---- */
-.love-scene { position: relative; max-width: 700px; margin: 28px auto 0; padding: 26px 10px 6px; animation: rise .8s ease both; }
-.sheet-back { position: absolute; left: 50%; top: 40px; width: 84%; height: calc(100% - 120px); border-radius: 6px; box-shadow: 0 8px 22px rgba(143, 53, 80, .12); }
-.sheet-pink { background: linear-gradient(160deg, #f6cfcc, #eeb4b6); transform: translateX(-54%) rotate(-5deg); }
-.sheet-gingham { background-color: #fdeceb; background-image: repeating-linear-gradient(0deg, rgba(236, 150, 164, .32) 0 16px, transparent 16px 32px), repeating-linear-gradient(90deg, rgba(236, 150, 164, .32) 0 16px, transparent 16px 32px); transform: translateX(-44%) rotate(4deg); }
-.sheet {
-  position: relative; z-index: 1; padding: 62px clamp(22px, 7vw, 54px) 64px; border-radius: 6px; text-align: center;
-  background: radial-gradient(120% 80% at 20% 0, #fffdf8, transparent 60%), linear-gradient(165deg, #fffaf1, #fbefe2);
-  box-shadow: 0 18px 40px rgba(143, 53, 80, .2), 0 2px 0 rgba(255, 255, 255, .8) inset;
-}
-.sheet::before { content: ""; position: absolute; inset: 14px; border: 1px solid rgba(222, 156, 166, .6); border-radius: 3px; pointer-events: none; }
-.bow { position: absolute; top: -20px; left: 50%; width: 92px; transform: translateX(-50%); filter: drop-shadow(0 4px 5px rgba(143, 53, 80, .22)); }
-.sprig { position: absolute; right: 18px; bottom: 16px; width: 82px; opacity: .92; pointer-events: none; }
-.seal { position: absolute; left: -10px; bottom: 26px; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; color: #fff4ef; font-size: 1.3rem; background: radial-gradient(circle at 35% 30%, #e9b2a6, #c98078 70%); box-shadow: 0 4px 10px rgba(143, 53, 80, .3), inset 0 0 0 3px rgba(255, 255, 255, .25); }
 .polaroid { position: relative; margin: 6px auto 26px; background: #fff; padding: 9px 9px 30px; width: min(240px, 72%); box-shadow: 0 10px 24px rgba(143, 53, 80, .22); transform: rotate(-2.5deg); }
 .polaroid::before { content: ""; position: absolute; top: -12px; left: 50%; width: 76px; height: 24px; transform: translateX(-50%) rotate(2deg); background: rgba(244, 196, 204, .75); box-shadow: 0 1px 3px rgba(0, 0, 0, .1); }
 .polaroid img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
@@ -239,5 +226,14 @@ svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-wid
 .letter p:first-child { font-size: 1.15em; text-align: center; }
 .letter p:last-child { text-align: center; margin-bottom: 0; }
 @keyframes inkIn { from { opacity: 0; transform: translateY(8px); } }
-@media (max-width: 480px) { .seal { left: -6px; width: 44px; height: 44px; } .sprig { width: 64px; right: 12px; } }
-.love-scene { overflow-x: clip; }
+/* giấy viết thư 3 lát: đầu (nơ) + giữa (kéo giãn theo chữ) + chân (cành hoa) */
+.love-scene { max-width: 720px; margin: 28px auto 0; overflow-x: clip; animation: rise .8s ease both; }
+.ps { width: 100%; }
+@media (max-width: 600px) { .ps { width: 122%; margin-left: -11%; } }
+.ps-top { aspect-ratio: 1024 / 770; background: url(../images/love/letter-top.jpg) center / 100% 100% no-repeat; }
+.ps-mid { display: flow-root; background: url(../images/love/letter-mid.jpg) center / 100% 100% no-repeat; margin: -1px 0; }
+.ps-content { margin: -31% 0 -3%; padding: 0 22% 0 21%; position: relative; text-align: center; }
+.ps-bot { aspect-ratio: 1024 / 724; background: url(../images/love/letter-bot.jpg) center / 100% 100% no-repeat; }
+.ps .polaroid { width: min(64%, 230px); margin: 0 auto 22px; }
+.ps .letter { font-size: clamp(1.2rem, 4.3vw, 1.65rem); line-height: 1.5; max-width: none; }
+.love-scene .btn-row { margin-top: -6%; position: relative; }
