@@ -104,7 +104,7 @@
             <p class="lead">Một trải nghiệm vui lấy cảm hứng từ các nhóm tính cách và Tarot. Kết quả mang tính giải trí và truyền cảm hứng. Khoảng 3–5 phút.</p>
             <form class="name-form" autocomplete="off">
               <label for="pname">Tên của bạn</label>
-              <input id="pname" name="pname" maxlength="24" placeholder="Ví dụ: Lan Anh" value="${esc(playerName)}" enterkeyhint="go">
+              <input id="pname" name="pname" maxlength="24" placeholder="Nhập tên của bạn" value="${esc(playerName)}" enterkeyhint="go">
               <button class="btn" type="submit" ${playerName.trim() ? '' : 'disabled'}>Bắt đầu khám phá →</button>
             </form>
           </div>
