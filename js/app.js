@@ -1,7 +1,7 @@
 // UI + state machine: landing → quiz → personality-result → tarot-selection → tarot-reveal → final-result → share
 (function () {
   const { QUIZ_QUESTIONS, TAROT_DECK, MESSAGES: M, SITE } = globalThis;
-  const { Engine, Compose, Art } = globalThis;
+  const { Engine, Compose, Art, LOVE } = globalThis;
   const offerCount = () => (window.innerWidth >= 820 ? 9 : 7);
   const $app = document.getElementById('app');
 
@@ -9,6 +9,65 @@
   try { playerName = localStorage.getItem('player2010') || ''; } catch (e) { /* private mode */ }
   const fresh = () => ({ screen: 'landing', order: [], current: 0, answers: {}, type: null, personality: null, drawn: [], offered: [], selected: null, final: null, shareUrl: null });
   let state = fresh();
+
+  // ---------- phiên bản tình yêu: ảnh nhập tay + thư + popup ----------
+  let lovePhoto = '';
+  try { lovePhoto = localStorage.getItem(LOVE.storageKey) || ''; } catch (e) { /* private mode */ }
+  const toast = (msg) => {
+    const t = document.getElementById('love-toast'); if (!t) return;
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast.id); toast.id = setTimeout(() => t.classList.remove('show'), 2200);
+  };
+  // Thu nhỏ ảnh trước khi lưu để vừa localStorage và tải nhanh.
+  function shrinkPhoto(file) {
+    return new Promise((res, rej) => {
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onload = () => {
+        const k = Math.min(1, LOVE.photoMaxSize / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas'); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(url); res(cv.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('bad image')); };
+      img.src = url;
+    });
+  }
+  document.getElementById('love-pick').addEventListener('click', () => document.getElementById('love-file').click());
+  document.getElementById('love-file').addEventListener('change', async (e) => {
+    const f = e.target.files && e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    try {
+      lovePhoto = await shrinkPhoto(f);
+      try { localStorage.setItem(LOVE.storageKey, lovePhoto); } catch (err) { /* vẫn dùng được trong phiên này */ }
+      toast('Đã thêm ảnh ♥');
+      if (state.screen === 'final-result') render();
+    } catch (err) { toast('Không đọc được ảnh này'); }
+  });
+
+  let modalOpener = null;
+  function openLoveModal(opener) {
+    modalOpener = opener;
+    const m = document.createElement('div');
+    m.className = 'love-modal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-label', 'Lời nhắn bất ngờ');
+    m.innerHTML = `<div class="love-modal-box"><button type="button" class="love-close" aria-label="Đóng">×</button>
+      <img src="${esc(LOVE.popupImage)}" alt="${esc(LOVE.popupAlt)}" onerror="this.remove()">
+      <div class="hearts" aria-hidden="true">${[...'💖💕💗💞💓💖💕'].map((h, i) => `<span style="--i:${i}">${h}</span>`).join('')}</div></div>`;
+    document.body.appendChild(m);
+    const close = () => { m.remove(); document.removeEventListener('keydown', onKey); if (modalOpener && modalOpener.isConnected) modalOpener.focus(); };
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', onKey);
+    m.addEventListener('click', (e) => { if (e.target === m || e.target.closest('.love-close')) close(); });
+    m.querySelector('.love-close').focus();
+  }
+
+  function loveSection() {
+    return `
+      <section class="card love-box" aria-label="Lá thư dành cho bạn">
+        ${lovePhoto ? `<figure class="polaroid"><img src="${lovePhoto}" alt="${esc(LOVE.photoAlt)}"></figure>` : ''}
+        <div class="letter">${LOVE.letter.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
+        <div class="btn-row"><button class="btn" data-act="love-ok">${esc(LOVE.button)}</button></div>
+      </section>`;
+  }
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const chips = (arr, cls = '') => `<ul class="chips">${arr.map((x) => `<li class="chip ${cls}">${esc(x)}</li>`).join('')}</ul>`;
@@ -221,6 +280,7 @@
           <p class="note" style="margin-top:18px">${esc(f.note)}</p>
           <div class="congrats"><h3>Chúc mừng 20/10!</h3><p>Bạn xứng đáng với tất cả những điều tuyệt vời nhất.</p></div>
         </div>
+        ${loveSection()}
         <div class="btn-row">
           <button class="btn" data-act="share">${icon('share')} Chia sẻ kết quả</button>
           <button class="btn ghost" data-act="again">Rút thêm một lá</button>
@@ -427,6 +487,7 @@
     else if (act === 'to-tarot' || act === 'again') dealTarot();
     else if (act === 'pick') pickCard(el.dataset.id);
     else if (act === 'to-final') showFinal();
+    else if (act === 'love-ok') openLoveModal(el);
     else if (act === 'share') openShare();
     else if (act === 'download') download();
     else if (act === 'back-final') go('final-result');
@@ -445,6 +506,7 @@
   }
 
   render();
+  new Image().src = LOVE.popupImage;
   // Tải sẵn 2 câu đầu lúc người chơi còn đang nhập tên.
   Engine.interleave(QUIZ_QUESTIONS).slice(0, 2).forEach((q) => quizImgs(q).forEach(loadImg));
 })();

@@ -10,7 +10,14 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="top"><span class="brand">HerJourney</span></header>
+  <header class="top">
+    <span class="brand">HerJourney</span>
+    <button type="button" id="love-pick" class="love-pick" aria-label="Thêm ảnh bất ngờ" title="♥">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.600-7 10-7 10z"/></svg>
+    </button>
+    <input type="file" id="love-file" accept="image/*" hidden>
+  </header>
+  <div id="love-toast" class="love-toast" role="status" aria-live="polite"></div>
   <main id="app" aria-live="polite"></main>
   <noscript><p style="padding:24px">Trang này cần bật JavaScript để chơi.</p></noscript>
   <script src="js/analytics.js"></script>
@@ -18,6 +25,7 @@
   <script src="data/personalities.js"></script>
   <script src="data/tarot.js"></script>
   <script src="data/messages.js"></script>
+  <script src="data/love.js"></script>
   <script src="js/engine.js"></script>
   <script src="js/compose.js"></script>
   <script src="js/art.js"></script>
